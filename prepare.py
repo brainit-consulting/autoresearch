@@ -83,6 +83,7 @@ DATASET_CONFIGS = {
     "chesspgn": {
         "format": "pgn_zst",
         "base_url": "https://database.lichess.org/standard/lichess_db_standard_rated_{year}-{month:02d}.pgn.zst",
+        "fname_template": "lichess_{year}-{month:02d}.pgn.zst",
         "files": [(2013, 1), (2013, 2), (2013, 3), (2013, 4), (2013, 5), (2013, 6)],
         "val_games": 50_000,
         "splits": {"val": (0, 50_000), "train": (50_000, None)},
@@ -204,9 +205,10 @@ def _pgn_zst_files(dataset_name=None):
     dataset = _resolve_dataset_name(dataset_name)
     config = DATASET_CONFIGS[dataset]
     data_dir = _data_dir(dataset)
+    fname_template = config.get("fname_template", "lichess_db_standard_rated_{year}-{month:02d}.pgn.zst")
     paths = []
     for year, month in config["files"]:
-        fname = f"lichess_db_standard_rated_{year}-{month:02d}.pgn.zst"
+        fname = fname_template.format(year=year, month=month)
         paths.append(os.path.join(data_dir, fname))
     return paths
 
@@ -234,8 +236,9 @@ def _download_chesspgn_files(dataset_name):
     config = DATASET_CONFIGS[dataset]
     data_dir = _data_dir(dataset)
     os.makedirs(data_dir, exist_ok=True)
+    fname_template = config.get("fname_template", "lichess_db_standard_rated_{year}-{month:02d}.pgn.zst")
     for year, month in config["files"]:
-        fname = f"lichess_db_standard_rated_{year}-{month:02d}.pgn.zst"
+        fname = fname_template.format(year=year, month=month)
         filepath = os.path.join(data_dir, fname)
         if os.path.exists(filepath):
             print(f"Data: {fname} already downloaded")
