@@ -1,1 +1,7 @@
 commit	val_bpb	memory_gb	status	description
+8ebd589	1.345913	5.3	keep	baseline: DEPTH=8, WINDOW=SSSL, default hyperparams
+eb585fd	1.176273	4.7	keep	DEPTH=6, WINDOW=L: smaller model, more steps, less VRAM
+b82a665	0.781611	4.7	keep	TOTAL_BATCH_SIZE 2^17: 77 steps vs 28, massive improvement
+6ca6116	0.660010	4.7	keep	TOTAL_BATCH_SIZE 2^16: 157 steps, trend continues
+4d9be33	0.625961	4.7	keep	TOTAL_BATCH_SIZE 2^15: 312 steps, diminishing returns
+3acc966	0.611901	2.4	keep	DEVICE_BATCH_SIZE=8, 2^14: 601 steps, tiny gain, 2.5GB VRAM
