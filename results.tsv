@@ -5,3 +5,17 @@ b82a665	0.781611	4.7	keep	TOTAL_BATCH_SIZE 2^17: 77 steps vs 28, massive improve
 6ca6116	0.660010	4.7	keep	TOTAL_BATCH_SIZE 2^16: 157 steps, trend continues
 4d9be33	0.625961	4.7	keep	TOTAL_BATCH_SIZE 2^15: 312 steps, diminishing returns
 3acc966	0.611901	2.4	keep	DEVICE_BATCH_SIZE=8, 2^14: 601 steps, tiny gain, 2.5GB VRAM
+470fb25	0.602986	2.4	keep	HEAD_DIM=64: 6 heads vs 3, same VRAM, 726 steps
+aa43a45	0.621193	1.3	discard	TOTAL_BATCH_SIZE 2^13: too small, gradient noise hurts
+20cefb1	0.613006	2.4	discard	MATRIX_LR 0.05: LR too high, diverges
+374787d	0.612048	2.3	discard	DEPTH=4 ASPECT_RATIO=96: shallower hurts, depth matters
+662dfc2	0.618452	2.4	discard	WARMDOWN_RATIO=0.6: longer warmdown hurts, 0.5 is sweet spot
+867abc8	0.638939	2.6	discard	DEPTH=8 ASPECT_RATIO=48: deeper too slow, 526 steps insufficient
+9aecfa1	0.624722	2.4	discard	FINAL_LR_FRAC=0.1: residual LR hurts, decay to zero is better
+95db9a6	0.614441	2.4	discard	WEIGHT_DECAY=0.1: less regularization doesn't help
+4dafaf8	0.627950	2.4	discard	ns_steps=3: less precise Muon orthogonalization hurts quality
+3495038	0.604804	2.4	discard	ADAM_BETAS beta1=0.9: marginally worse, within noise
+06592fb	0.608021	2.4	discard	WARMDOWN_RATIO=0.4: slightly shorter cooldown, 0.5 still better
+9a20cb7	0.621766	2.4	discard	MATRIX_LR=0.03: too low, 0.04 is the sweet spot
+c0cfdd4	0.677069	3.5	discard	GQA n_kv_head=2: SDPA no GQA kernel on RTX3070Ti, 797s eval
+7dd60e6	0.638568	2.4	discard	WARMUP_RATIO=0.02: warmup hurts, 541 steps (had GPU contention)

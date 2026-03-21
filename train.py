@@ -419,8 +419,8 @@ class CausalSelfAttention(nn.Module):
 class MLP(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.c_fc = nn.Linear(config.n_embd, 4 * config.n_embd, bias=False)
-        self.c_proj = nn.Linear(4 * config.n_embd, config.n_embd, bias=False)
+        self.c_fc = nn.Linear(config.n_embd, MLP_RATIO * config.n_embd, bias=False)
+        self.c_proj = nn.Linear(MLP_RATIO * config.n_embd, config.n_embd, bias=False)
 
     def forward(self, x):
         x = self.c_fc(x)
@@ -798,6 +798,7 @@ class MuonAdamW(torch.optim.Optimizer):
 # Model architecture
 ASPECT_RATIO = 64         # model_dim = depth * ASPECT_RATIO
 HEAD_DIM = 64             # target head dimension for attention
+MLP_RATIO = 3             # MLP hidden expansion factor (default 4)
 WINDOW_PATTERN = "L"      # sliding window pattern: L=full, S=half context
 
 # Optimization
