@@ -11,10 +11,12 @@ AUTORESEARCH_DATASET or by running this script with --dataset.
 """
 
 import argparse
+import io
 import math
 import os
 import pickle
 import shutil
+import subprocess
 import time
 
 import pyarrow.parquet as pq
@@ -43,7 +45,7 @@ BOS_TOKEN = "<|reserved_0|>"
 # ---------------------------------------------------------------------------
 
 DEFAULT_DATASET = "tinystories"
-DATASET_CHOICES = ("tinystories",)
+DATASET_CHOICES = ("tinystories", "chesspgn")
 
 
 def _default_cache_dir():
@@ -77,6 +79,13 @@ DATASET_CONFIGS = {
             "val": (10_000, 20_000),
             "train": (20_000, None),
         },
+    },
+    "chesspgn": {
+        "format": "pgn_zst",
+        "base_url": "https://database.lichess.org/standard/lichess_db_standard_rated_{year}-{month:02d}.pgn.zst",
+        "files": [(2013, 1), (2013, 2), (2013, 3), (2013, 4), (2013, 5), (2013, 6)],
+        "val_games": 50_000,
+        "splits": {"val": (0, 50_000), "train": (50_000, None)},
     },
 }
 
@@ -186,8 +195,55 @@ def _resolve_tiny_parquet_for_read(dataset_name=None):
 
 
 # ---------------------------------------------------------------------------
-# Data download (TinyStories only)
+# Chess PGN file helpers
 # ---------------------------------------------------------------------------
+
+
+def _pgn_zst_files(dataset_name=None):
+    """Return the list of expected .pgn.zst file paths for the chesspgn dataset."""
+    dataset = _resolve_dataset_name(dataset_name)
+    config = DATASET_CONFIGS[dataset]
+    data_dir = _data_dir(dataset)
+    paths = []
+    for year, month in config["files"]:
+        fname = f"lichess_db_standard_rated_{year}-{month:02d}.pgn.zst"
+        paths.append(os.path.join(data_dir, fname))
+    return paths
+
+
+# ---------------------------------------------------------------------------
+# Data download
+# ---------------------------------------------------------------------------
+
+
+def _download_with_curl(url, filepath):
+    temp_path = filepath + ".tmp"
+    result = subprocess.run(
+        ["curl", "-L", "--retry", "3", "-o", temp_path, url],
+        check=False,
+    )
+    if result.returncode != 0:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        raise RuntimeError(f"curl failed with return code {result.returncode} for {url}")
+    os.rename(temp_path, filepath)
+
+
+def _download_chesspgn_files(dataset_name):
+    dataset = _resolve_dataset_name(dataset_name)
+    config = DATASET_CONFIGS[dataset]
+    data_dir = _data_dir(dataset)
+    os.makedirs(data_dir, exist_ok=True)
+    for year, month in config["files"]:
+        fname = f"lichess_db_standard_rated_{year}-{month:02d}.pgn.zst"
+        filepath = os.path.join(data_dir, fname)
+        if os.path.exists(filepath):
+            print(f"Data: {fname} already downloaded")
+            continue
+        url = config["base_url"].format(year=year, month=month)
+        print(f"Data: downloading {fname} from {url}...")
+        _download_with_curl(url, filepath)
+        print(f"Data: downloaded {fname}")
 
 
 def _download_tinystories_file(dataset_name):
@@ -217,7 +273,10 @@ def _download_tinystories_file(dataset_name):
 
 def download_data(dataset_name):
     dataset = _resolve_dataset_name(dataset_name)
-    _download_tinystories_file(dataset)
+    if dataset == "chesspgn":
+        _download_chesspgn_files(dataset)
+    else:
+        _download_tinystories_file(dataset)
 
 
 # ---------------------------------------------------------------------------
@@ -268,11 +327,62 @@ def _iter_tinystories_texts(split, dataset_name=None):
             current_idx += 1
 
 
+def _iter_pgn_games_from_zst(filepath):
+    """Yield full PGN game strings from a .pgn.zst file."""
+    import zstandard as zstd
+    dctx = zstd.ZstdDecompressor()
+    with open(filepath, "rb") as fh:
+        with dctx.stream_reader(fh) as reader:
+            text_stream = io.TextIOWrapper(reader, encoding="utf-8", errors="replace")
+            game_lines = []
+            for line in text_stream:
+                line = line.rstrip("\n")
+                if line.startswith("[Event ") and game_lines:
+                    game_text = "\n".join(game_lines).strip()
+                    if game_text:
+                        yield game_text
+                    game_lines = [line]
+                else:
+                    game_lines.append(line)
+            if game_lines:
+                game_text = "\n".join(game_lines).strip()
+                if game_text:
+                    yield game_text
+
+
+def _iter_chesspgn_texts(split, dataset_name=None):
+    dataset = _resolve_dataset_name(dataset_name)
+    config = DATASET_CONFIGS[dataset]
+    start_idx, end_idx = config["splits"][split]
+    filepaths = _pgn_zst_files(dataset)
+    current_idx = 0
+    for filepath in filepaths:
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(
+                f"Chess PGN file not found: {filepath}. Run prepare.py --dataset chesspgn first."
+            )
+        for game_text in _iter_pgn_games_from_zst(filepath):
+            if current_idx < start_idx:
+                current_idx += 1
+                continue
+            if end_idx is not None and current_idx >= end_idx:
+                return
+            yield game_text
+            current_idx += 1
+
+
+def _iter_texts(split, dataset_name=None):
+    dataset = _resolve_dataset_name(dataset_name)
+    if dataset == "chesspgn":
+        return _iter_chesspgn_texts(split, dataset_name=dataset)
+    return _iter_tinystories_texts(split, dataset_name=dataset)
+
+
 def text_iterator(dataset_name=None, max_chars=1_000_000_000, doc_cap=10_000):
     dataset = _resolve_dataset_name(dataset_name)
     chars = 0
 
-    text_iter = _iter_tinystories_texts("train", dataset_name=dataset)
+    text_iter = _iter_texts("train", dataset_name=dataset)
     for text in text_iter:
         doc = text[:doc_cap] if len(text) > doc_cap else text
         chars += len(doc)
@@ -293,10 +403,17 @@ def train_tokenizer(dataset_name=None):
 
     os.makedirs(tokenizer_dir, exist_ok=True)
 
-    parquet_files = list_parquet_files(dataset)
-    if len(parquet_files) < 1:
-        print("Tokenizer: TinyStories parquet is missing. Run prepare.py first.")
-        raise RuntimeError("TinyStories parquet is missing.")
+    if dataset == "chesspgn":
+        pgn_files = _pgn_zst_files(dataset)
+        missing = [f for f in pgn_files if not os.path.exists(f)]
+        if missing:
+            print(f"Tokenizer: Chess PGN files missing. Run prepare.py --dataset chesspgn first.")
+            raise RuntimeError("Chess PGN files are missing.")
+    else:
+        parquet_files = list_parquet_files(dataset)
+        if len(parquet_files) < 1:
+            print("Tokenizer: TinyStories parquet is missing. Run prepare.py first.")
+            raise RuntimeError("TinyStories parquet is missing.")
 
     print(f"Tokenizer: training BPE tokenizer ({dataset})...")
     t0 = time.time()
@@ -408,7 +525,7 @@ def _document_batches(split, dataset=None, tokenizer_batch_size=128):
     epoch = 1
     while True:
         batch = []
-        for text in _iter_tinystories_texts(split, dataset_name=dataset_name):
+        for text in _iter_texts(split, dataset_name=dataset_name):
             batch.append(text)
             if len(batch) >= tokenizer_batch_size:
                 yield batch, epoch
