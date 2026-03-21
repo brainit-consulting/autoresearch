@@ -6,6 +6,7 @@ b82a665	0.781611	4.7	keep	TOTAL_BATCH_SIZE 2^17: 77 steps vs 28, massive improve
 4d9be33	0.625961	4.7	keep	TOTAL_BATCH_SIZE 2^15: 312 steps, diminishing returns
 3acc966	0.611901	2.4	keep	DEVICE_BATCH_SIZE=8, 2^14: 601 steps, tiny gain, 2.5GB VRAM
 470fb25	0.602986	2.4	keep	HEAD_DIM=64: 6 heads vs 3, same VRAM, 726 steps
+a164648	0.602227	2.4	keep	MLP_RATIO=3: marginally better + fewer params + 767 steps
 aa43a45	0.621193	1.3	discard	TOTAL_BATCH_SIZE 2^13: too small, gradient noise hurts
 20cefb1	0.613006	2.4	discard	MATRIX_LR 0.05: LR too high, diverges
 374787d	0.612048	2.3	discard	DEPTH=4 ASPECT_RATIO=96: shallower hurts, depth matters
@@ -19,3 +20,5 @@ aa43a45	0.621193	1.3	discard	TOTAL_BATCH_SIZE 2^13: too small, gradient noise hu
 9a20cb7	0.621766	2.4	discard	MATRIX_LR=0.03: too low, 0.04 is the sweet spot
 c0cfdd4	0.677069	3.5	discard	GQA n_kv_head=2: SDPA no GQA kernel on RTX3070Ti, 797s eval
 7dd60e6	0.638568	2.4	discard	WARMUP_RATIO=0.02: warmup hurts, 541 steps (had GPU contention)
+14641dd	0.603176	2.4	discard	MLP_RATIO=2: too narrow, 3x is sweet spot
+4179a4d	0.631035	2.3	discard	no VE: value embeddings are crucial for quality
