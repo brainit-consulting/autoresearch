@@ -796,7 +796,7 @@ class MuonAdamW(torch.optim.Optimizer):
 # ---------------------------------------------------------------------------
 
 # Model architecture
-ASPECT_RATIO = 48         # model_dim = depth * ASPECT_RATIO
+ASPECT_RATIO = 64         # model_dim = depth * ASPECT_RATIO
 HEAD_DIM = 64             # target head dimension for attention
 MLP_RATIO = 3             # MLP hidden expansion factor (default 4)
 WINDOW_PATTERN = "L"      # sliding window pattern: L=full, S=half context
@@ -814,7 +814,7 @@ WARMDOWN_RATIO = 0.5
 FINAL_LR_FRAC = 0.0
 
 # Model size + memory defaults
-DEPTH = 6
+DEPTH = 5
 DEVICE_BATCH_SIZE = 8
 EVAL_BATCH_SIZE = 8
 
