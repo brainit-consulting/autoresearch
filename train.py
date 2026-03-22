@@ -369,6 +369,8 @@ class CausalSelfAttention(nn.Module):
 
     def _get_sdpa_mask(self, seq_len, window_size, device):
         window = window_size[0] if isinstance(window_size, tuple) else window_size
+        if window is None or window >= seq_len:
+            return None  # use is_causal=True instead for full causal attention
         cache_key = (seq_len, int(window), device.type, device.index)
         mask = self._mask_cache.get(cache_key)
         if mask is not None:
@@ -376,9 +378,7 @@ class CausalSelfAttention(nn.Module):
 
         row = torch.arange(seq_len, device=device).unsqueeze(1)
         col = torch.arange(seq_len, device=device).unsqueeze(0)
-        mask = col <= row  # causal
-        if window is not None and window >= 0 and window < seq_len:
-            mask = mask & (col >= (row - window))
+        mask = (col <= row) & (col >= (row - window))
         self._mask_cache[cache_key] = mask
         return mask
 
@@ -406,7 +406,7 @@ class CausalSelfAttention(nn.Module):
             k,
             v,
             attn_mask=attn_mask,
-            is_causal=False,
+            is_causal=(attn_mask is None),
             enable_gqa=self.n_kv_head < self.n_head,
         )
         y = y.transpose(1, 2)
