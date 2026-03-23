@@ -216,3 +216,7 @@ bdaafecbc593902bb0c4bc5c63ab7bfa217564e0	0.569915	2.3	discard	Exp 237: ve_gate s
 6eda48a378993b8eeaa8e260ff9ef08cb38dbf51	0.567287	2.3	discard	Exp 238: SCALAR_LR=0.6 (worse, 0.5 optimal)
 533444d79d159276efcadb4662dd9c86716d8d5d	0.611432	2.3	discard	Exp 239: SwiGLU MLP ratio=2 (much worse, plain SiLU is better)
 a0a01fdb2909637d48e4b8e5f2c1aef9e2b6219c	0.577102	2.3	discard	Exp 240: ve_gate_channels=26 (worse, 28 confirmed optimal)
+7af4b6219807544899f94c187236aff5ea28e014	0.557216	2.3	discard	Exp 242: DEPTH=8 AR=40 TIME_BUDGET=500s (worse than DEPTH=6 best)
+7f3acf88be3efd1ac6bd1d61d669ca40db2db70b	0.562821	2.3	discard	Exp 243: DEPTH=5 AR=64 T=350s (worse than DEPTH=6 best)
+1ebee05c99e1496a853fda8cd1ec0ab9172c9056	0.564823	2.3	discard	Exp 244: DEPTH=4 AR=80 T=400s (worse, DEPTH=4 benefits from 300s not 400s)
+0a988674c2b1a907fd0de309b865f58f1adc576c	0.553692	2.3	discard	Exp 245: DEPTH=6 AR=48 T=500s (worse, 400s optimal)
