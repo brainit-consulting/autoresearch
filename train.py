@@ -805,7 +805,7 @@ WINDOW_PATTERN = "L"      # sliding window pattern: L=full, S=half context
 TOTAL_BATCH_SIZE = 2 ** 15
 EMBEDDING_LR = 1.2
 UNEMBEDDING_LR = 0.003
-MATRIX_LR = 0.04
+MATRIX_LR = 0.035
 SCALAR_LR = 0.5
 WEIGHT_DECAY = 0.2
 ADAM_BETAS = (0.8, 0.95)

@@ -273,3 +273,5 @@ c8a281c4225ef836874bf52544260df9e45d7670	0.558794	2.3	discard	Exp 294: 2^15 + EM
 658cc293faa8b5af24f9bae441ea1fca4c08d973	0.544357	2.3	discard	Exp 297: 2^15 T=510s (slightly worse than 480s)
 658cc293faa8b5af24f9bae441ea1fca4c08d973	0.549383	2.3	discard	Exp 298: 2^15 T=500s (worse, 480s optimal)
 658cc293faa8b5af24f9bae441ea1fca4c08d973	0.547982	2.3	discard	Exp 299: 2^15 T=490s (worse, 480s optimal)
+e9b13be	0.543465	2.3	keep	Exp 300: 2^15 T=480s ns_steps=6 (NEW BEST 0.543465)
+e9b13bed46f93f839c6f3d7dbd539923013c04cf	0.546640	2.3	discard	Exp 301: ns_steps=7 (worse, 6 optimal)
