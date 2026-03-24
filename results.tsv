@@ -282,3 +282,6 @@ db329fbfe336f449c89f30433c312f9b1a7361b4	0.547228	2.3	discard	Exp 305: SCALAR_LR
 db329fbfe336f449c89f30433c312f9b1a7361b4	0.543362	2.3	discard	Exp 306: UNEMBEDDING_LR=0.002 (slightly worse, 0.003 optimal)
 db329fbfe336f449c89f30433c312f9b1a7361b4	0.543301	2.3	discard	Exp 307: Muon beta2=0.97 (essentially same as 0.95)
 db329fbfe336f449c89f30433c312f9b1a7361b4	0.543591	2.3	discard	Exp 308: WEIGHT_DECAY=0.25 (slightly worse, 0.2 optimal)
+7f2f4a9	0.541114	2.3	keep	Exp 309: ADAM_BETAS=(0.8,0.98) (NEW BEST 0.541114)
+0d4d0f9	0.540507	2.3	keep	Exp 310: ADAM_BETAS=(0.8,0.99) (NEW BEST 0.540507)
+0d4d0f9f8e2eb8613e411deaefa9896753850728	0.541235	2.3	discard	Exp 311: ADAM_BETAS=(0.8,0.999) (worse, 0.99 optimal)
