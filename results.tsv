@@ -264,3 +264,7 @@ ac8dcf49a52927f2b04f930ec8145b4b27d27741	0.565850	2.3	discard	Exp 266: EMBEDDING
 062501b039363eab8fe93ee4fee8511985673818	0.563288	2.3	discard	Exp 288: MATRIX_LR=0.042 (worse, 0.04 optimal)
 062501b039363eab8fe93ee4fee8511985673818	0.563915	2.3	discard	Exp 289: constant WD no annealing (worse, annealed optimal)
 062501b039363eab8fe93ee4fee8511985673818	0.562684	2.3	discard	Exp 290: cosine LR warmdown (worse, linear optimal)
+c8a281c	0.549389	2.3	keep	Exp 291: TOTAL_BATCH_SIZE=2^15 (NEW BEST 0.549389)
+c8a281c4225ef836874bf52544260df9e45d7670	0.563244	2.3	discard	Exp 292: TOTAL_BATCH_SIZE=2^16 (worse, 2^15 optimal)
+c8a281c4225ef836874bf52544260df9e45d7670	0.562613	2.3	discard	Exp 293: 2^15 + MATRIX_LR=0.057 sqrt2 scaled (worse)
+c8a281c4225ef836874bf52544260df9e45d7670	0.558794	2.3	discard	Exp 294: 2^15 + EMBEDDING_LR=1.7 (worse, 1.2 optimal)
