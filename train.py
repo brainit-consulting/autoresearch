@@ -802,7 +802,7 @@ MLP_RATIO = 3             # MLP hidden expansion factor (default 4)
 WINDOW_PATTERN = "L"      # sliding window pattern: L=full, S=half context
 
 # Optimization
-TOTAL_BATCH_SIZE = 2 ** 14
+TOTAL_BATCH_SIZE = 2 ** 15
 EMBEDDING_LR = 1.2
 UNEMBEDDING_LR = 0.003
 MATRIX_LR = 0.04
