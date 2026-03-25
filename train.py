@@ -466,7 +466,7 @@ class GPT(nn.Module):
 
     @torch.no_grad()
     def init_weights(self, embed_dtype=torch.bfloat16):
-        torch.nn.init.normal_(self.transformer.wte.weight, mean=0.0, std=1.0)
+        torch.nn.init.normal_(self.transformer.wte.weight, mean=0.0, std=0.5)
         torch.nn.init.normal_(self.lm_head.weight, mean=0.0, std=0.001)
         n_embd = self.config.n_embd
         s = 3 ** 0.5 * n_embd ** -0.5
