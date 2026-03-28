@@ -64,6 +64,29 @@ Single 5-minute training run:
 AUTORESEARCH_CACHE_DIR=h:/autoresearch/.cache uv run train.py --dataset chesspgn
 ```
 
+## Running the Chess Benchmark
+
+Board-aware continuation benchmark:
+
+```bash
+AUTORESEARCH_CACHE_DIR=h:/autoresearch/.cache uv run eval_chess.py --dataset chesspgn --checkpoint checkpoint_pre_eval.pt
+```
+
+Optional knobs:
+
+- `--device auto|cpu|cuda`
+- `--max-games 100`
+- `--plies 8 16`
+- `--greedy-samples 3`
+
+Reported metrics:
+
+- `legal_move_rate`
+- `next_move_top1_accuracy`
+- `next_move_top3_accuracy`
+- `avg_legal_candidates`
+- deterministic printed examples showing prompt, generated move, legality, ground truth, and top-ranked legal candidates
+
 ## Interpreting Results Correctly
 
 The current branch should be described as a chess-PGN modeling project, not a verified chess-playing model.

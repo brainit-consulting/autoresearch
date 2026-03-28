@@ -42,6 +42,12 @@ Public summary and charts:
 - [Major improvements waterfall](progress-waterfall.png)
 - [Category summary chart](progress-categories.png)
 
+Benchmarking:
+
+- `uv run eval_chess.py --dataset chesspgn --checkpoint <path-to-checkpoint.pt>`
+- current benchmark focuses on legal next-move generation and continuation ranking from movetext-only prompts
+- it is stronger than raw PGN sampling, but it is still not an engine-strength benchmark
+
 ## Why Chess PGN
 
 Chess PGN is a good target for short autonomous runs because it is structured, repetitive, and information-dense. That makes it a useful domain for measuring whether an agent can improve a model quickly under a strict wall-clock budget.
@@ -72,6 +78,24 @@ uv run train.py --dataset chesspgn
 ```
 
 More setup details are in [docs/setup-and-usage.md](docs/setup-and-usage.md).
+
+## Chess Benchmark
+
+After training or loading a checkpoint, run:
+
+```powershell
+uv run eval_chess.py --dataset chesspgn --checkpoint checkpoint_pre_eval.pt
+```
+
+The benchmark reports:
+
+- `legal_move_rate`
+- `next_move_top1_accuracy`
+- `next_move_top3_accuracy`
+- `avg_legal_candidates`
+- a few deterministic qualitative examples
+
+This benchmark is board-aware and stronger than simple text sampling, but it still does not measure playing strength the way an engine match or Stockfish-based evaluation would.
 
 ## How The Loop Works
 
