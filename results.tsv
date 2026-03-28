@@ -1,0 +1,353 @@
+commit	val_bpb	memory_gb	status	description
+8ebd589	1.345913	5.3	keep	baseline: DEPTH=8, WINDOW=SSSL, default hyperparams
+eb585fd	1.176273	4.7	keep	DEPTH=6, WINDOW=L: smaller model, more steps, less VRAM
+b82a665	0.781611	4.7	keep	TOTAL_BATCH_SIZE 2^17: 77 steps vs 28, massive improvement
+6ca6116	0.660010	4.7	keep	TOTAL_BATCH_SIZE 2^16: 157 steps, trend continues
+4d9be33	0.625961	4.7	keep	TOTAL_BATCH_SIZE 2^15: 312 steps, diminishing returns
+3acc966	0.611901	2.4	keep	DEVICE_BATCH_SIZE=8, 2^14: 601 steps, tiny gain, 2.5GB VRAM
+470fb25	0.602986	2.4	keep	HEAD_DIM=64: 6 heads vs 3, same VRAM, 726 steps
+a164648	0.602227	2.4	keep	MLP_RATIO=3: marginally better + fewer params + 767 steps
+aa43a45	0.621193	1.3	discard	TOTAL_BATCH_SIZE 2^13: too small, gradient noise hurts
+20cefb1	0.613006	2.4	discard	MATRIX_LR 0.05: LR too high, diverges
+374787d	0.612048	2.3	discard	DEPTH=4 ASPECT_RATIO=96: shallower hurts, depth matters
+662dfc2	0.618452	2.4	discard	WARMDOWN_RATIO=0.6: longer warmdown hurts, 0.5 is sweet spot
+867abc8	0.638939	2.6	discard	DEPTH=8 ASPECT_RATIO=48: deeper too slow, 526 steps insufficient
+9aecfa1	0.624722	2.4	discard	FINAL_LR_FRAC=0.1: residual LR hurts, decay to zero is better
+95db9a6	0.614441	2.4	discard	WEIGHT_DECAY=0.1: less regularization doesn't help
+4dafaf8	0.627950	2.4	discard	ns_steps=3: less precise Muon orthogonalization hurts quality
+3495038	0.604804	2.4	discard	ADAM_BETAS beta1=0.9: marginally worse, within noise
+06592fb	0.608021	2.4	discard	WARMDOWN_RATIO=0.4: slightly shorter cooldown, 0.5 still better
+9a20cb7	0.621766	2.4	discard	MATRIX_LR=0.03: too low, 0.04 is the sweet spot
+c0cfdd4	0.677069	3.5	discard	GQA n_kv_head=2: SDPA no GQA kernel on RTX3070Ti, 797s eval
+7dd60e6	0.638568	2.4	discard	WARMUP_RATIO=0.02: warmup hurts, 541 steps (had GPU contention)
+14641dd	0.603176	2.4	discard	MLP_RATIO=2: too narrow, 3x is sweet spot
+4179a4d	0.631035	2.3	discard	no VE: value embeddings are crucial for quality
+52ef5e9	0.601520	2.4	keep	EMBEDDING_LR=1.0: faster chess token embedding, 847 steps
+e2a672e	0.601849	2.4	discard	SCALAR_LR=0.3: within noise, 0.5 is better
+58ac56b	0.606673	2.4	discard	LOGIT_SOFTCAP=30: less capping hurts, 15 is sweet spot
+9da04af	0.598034	2.4	keep	ASPECT_RATIO=48: model_dim 384->320, 944 steps vs 847
+4dc3015	0.619919	2.3	discard	ASPECT_RATIO=40: model_dim 256 too small, capacity hurts
+87eff1b	0.600902	2.4	discard	ROPE_BASE=500: worse than 10000, positional encoding hurt
+8d09678	0.605172	2.4	discard	softcap=10: tighter cap hurts, 15 is sweet spot
+3e2a3e8	0.587627	2.4	keep	DEPTH=5 AR=64: same model_dim=320, 1059 steps vs 944
+3c0586c	0.586599	2.3	keep	DEPTH=4 AR=80: same model_dim=320, 1228 steps vs 1059
+0fed872	0.584987	2.3	keep	DEPTH=3 AR=96: same model_dim=320, 1506 steps vs 1228
+78a7ca1	0.603630	2.2	discard	DEPTH=2 AR=160: too shallow, 1765 steps insufficient capacity
+3373818	0.605586	2.3	discard	DEPTH=3 AR=80: model_dim 256 too narrow, capacity hurts
+59dd0e6	0.599083	2.3	discard	EMBEDDING_LR=2.0: too high, fewer steps and unstable
+50ea295	0.616268	2.4	discard	HEAD_DIM=32: 10 heads hurt, 64-dim heads better for chess
+0c210e8	0.592315	2.4	discard	MLP_RATIO=4: more MLP hurts, fewer steps dominates
+a7e168a	0.602444	2.3	discard	WARMDOWN_RATIO=0.45: 0.5 is still sweet spot
+fb72668	0.622660	2.4	discard	SwiGLU: relu^2 is better for chess, gating hurts
+c9bbf10	0.599956	2.3	discard	no checkpointing: slower on this hardware, fewer steps
+59b981b	0.599518	2.4	discard	VE all layers: extra VE at middle layer wastes capacity
+d911e19	0.596548	2.3	discard	Muon beta2=0.90: faster second-moment hurts, 0.95 better
+33f2734	0.606363	2.4	discard	WEIGHT_DECAY=0.3: more regularization hurts, 0.2 optimal
+5dfe1bc	0.598360	2.3	discard	ns_steps=7: slower steps with no quality gain vs 5
+edd83e8	0.603569	2.3	discard	ADAM_BETAS beta2=0.9: faster AdamW variance hurts, 0.95 better
+4d8b603	0.606462	2.4	discard	Muon warmup 300->100 steps: faster warmup hurts stability
+84e05c8	0.598495	2.3	discard	ns_steps=6: also worse than 5
+0fa35b7	0.597391	2.3	discard	Muon beta2=0.97: higher than 0.95 hurts, 0.95 is sweet spot
+6ae8a65	0.597132	2.3	discard	Muon momentum=0.98: higher than 0.95 hurts, 0.95 is sweet spot
+3c830c6	0.589275	2.3	discard	x0_lambdas init=0.05: worse than 0.1; sweet spot confirmed at 0.1
+64be040	0.591094	2.3	discard	Muon WD=0: scheduled WD decay is important for Muon matrix params
+840bbb3	0.594998	2.3	discard	softcap=20: worse than 15, sweet spot confirmed at 15
+afed185	0.601334	2.3	discard	ADAM_BETAS beta1=0.7: lower than 0.8 hurts, 0.8 is sweet spot
+6d8659f	0.593501	2.3	discard	ROPE_BASE=100000: worse than 10000, sweet spot confirmed at 10000
+6468b53	0.601047	2.3	discard	Muon warmup 500 steps: slower warmup hurts, 300 is sweet spot
+3e7d0c1	1.340297	2.3	discard	label_smoothing=0.1: corrupts eval BPB metric (smoothed != standard CE)
+faa5a6c	0.593375	2.3	discard	gradient clipping max_norm=1.0: slower+worse, no clipping is better
+27b7f41	0.619765	2.3	discard	AdamW eps=1e-8: much worse, aggressive 1e-10 critical for embedding LRs
+00593cb	0.611293	2.3	discard	VE gate channels=64: slower (1079 steps) and worse than 32
+f957678	0.618879	2.3	discard	VE layer 0 only: worse (1153 steps) than both layers 0+2
+f18005b	0.607256	2.3	discard	VE layer 2 only: better than layer 0 alone but needs both layers
+b16fa20	0.618034	2.3	discard	cosine WD decay: worse than linear, linear decay to 0 confirmed best
+7d55706	0.615803	2.3	discard	value_embeds WD=0.01: VE needs WD=0 for unrestricted growth
+2d3a1be	0.584827	2.2	keep	SiLU activation: faster than relu^2 (5.58% MFU), slight improvement
+593dcb7	0.591545	2.4	discard	SiLU + MLP_RATIO=4: bigger MLP still hurts even with faster SiLU
+ca6adb7	0.581459	2.3	keep	SiLU + DEPTH=4 AR=80: SiLU speed enables deeper model, new best (1363 steps)
+a61bfaa	0.606369	2.4	discard	SiLU + DEPTH=5 AR=64: too slow (883 steps), DEPTH=4 is sweet spot
+09da543	0.000000	0.0	discard	torch.compile: Triton not available on Windows, crashed at startup
+3bc9164	0.566672	2.3	keep	is_causal=True for full attention: 8.49% MFU (was 5.7%), 1768 steps, huge win
+57d90fe	0.587998	2.4	discard	DEPTH=5 AR=64 + is_causal=True: 1271 steps, still worse than DEPTH=4
+fc81631	0.575352	2.3	discard	DEPTH=4 AR=96 (model_dim=384): 1418 steps, wider model worse than 320
+a9d1c67	0.568347	2.2	discard	DEPTH=3 AR=96 + is_causal=True: 2100 steps, more steps but quality loses to DEPTH=4
+3e9214b	0.578702	2.3	discard	ns_steps=4: fewer Muon iterations, paradoxically slower and worse quality
+acd88e8	0.576616	2.3	discard	HEAD_DIM=80 (4 heads): non-power-of-2 dim hurts SDPA kernel, fewer steps
+9737446	0.568609	2.3	discard	WEIGHT_DECAY=0.15: thermal throttling, marginal vs 0.2 (inconclusive)
+c7e8fea	0.569561	2.3	discard	SCALAR_LR=0.7: genuinely worse, 1849 steps confirms thermal recovered
+aa13c51	0.563907	2.3	keep	EMBEDDING_LR=1.2: faster token embedding, new best (1868 steps, 8.98% MFU)
+dd4c38b	0.566744	2.3	discard	EMBEDDING_LR=1.4: thermal throttled (1478 steps), inconclusive
+814c6f0	0.572434	2.3	discard	EMBEDDING_LR=1.5: worse at 1630 steps, 1.2 is the optimum
+1a2c223	0.582310	2.3	discard	UNEMBEDDING_LR=0.006: too high, lm_head overfits, much worse
+f4da523	0.566327	2.3	discard	ADAM_BETAS=(0.85,0.95): slightly worse, beta1=0.8 confirmed optimal
+9a0e52a	0.576360	2.3	discard	x0_lambdas init=0.15: causes initial instability, worse than 0.1
+29706f6	0.565417	2.3	discard	LOGIT_SOFTCAP=13: slightly worse (1827 steps), softcap=15 confirmed optimal
+476da2e	0.570229	2.3	discard	ADAM_BETAS=(0.8, 0.98): beta2=0.98 slower variance, worse (1759 steps)
+1be527e	0.572203	2.3	discard	EMBEDDING_LR=1.3: worse than 1.2, embedding LR sweet spot confirmed at 1.2
+c1f5c2a	0.567494	2.3	discard	VE_LR=0.5: slower VE updates hurt, VE needs same fast LR as token embeddings
+07c4453	0.565628	2.3	discard	VE_LR=2.0: faster VE updates also hurt, VE optimal at same LR=1.2 as tokens
+714e6c1	0.565977	2.3	discard	Muon momentum=0.90: lower than 0.95 also hurts, sweet spot confirmed at 0.95
+4cdb075	0.582159	2.3	discard	TOTAL_BATCH_SIZE=2^13: small batch gradient noise dominates even with faster arch (3260 steps)
+5a43388	0.569190	1.7	discard	UNEMBEDDING_LR=0.002: too low, lm_head underfits, 0.004 confirmed optimal
+2b89656	0.572845	2.3	discard	VE gate channels=16: smaller gate worse, 32 is optimal (1685 steps)
+a0cf481	0.581648	2.3	discard	cosine LR warmdown: reaches near-zero LR too early, linear warmdown better (1650 steps)
+f4c5788	0.570423	2.3	discard	WEIGHT_DECAY=0.25: worse than 0.2, also thermal throttled (1635 steps)
+54a8e11	0.571318	2.3	discard	Muon beta2=0.93: worse than 0.95, sweet spot confirmed (1664 steps, thermal throttle)
+34588f3	0.577852	2.3	discard	Muon warmup start=0.90: worse, 0.85->0.95 warmup is optimal (1666 steps, thermal)
+90065b4	0.574678	2.3	discard	SCALAR_LR=0.6: between 0.5=best and 0.7=close; still worse, 0.5 confirmed optimal (1664 steps)
+9886ebe	0.570663	2.3	discard	WARMDOWN_RATIO=0.55: worse, 0.5 confirmed (1654 steps, thermal throttle)
+859b959	0.578210	2.3	discard	FINAL_LR_FRAC=0.02: residual LR hurts convergence, 0.0 confirmed optimal (1671 steps)
+40f6e0b	0.583059	2.3	discard	resid_lambdas init=0.9: weaker residuals hurt, 1.0 confirmed optimal (1755 steps)
+c9b5ec1	0.573010	2.3	discard	constant WD=0.2 (no decay): worse, linear decay to 0 confirmed optimal (1720 steps)
+b5406d1	0.566990	2.3	discard	x0_betas=(0.8,0.95): more reactive worse than 0.96; smooth momentum confirmed (1704 steps)
+70457db	0.607889	2.3	discard	parallel attn+MLP: much worse (1558 steps, 5.8% MFU), sequential structure important
+4edd88e	0.579566	2.3	discard	GeLU activation: slower than SiLU (1431 steps, 6% MFU), SiLU confirmed optimal
+37666a3	0.583636	2.3	discard	delayed WD decay: worse (1485 steps, severe thermal throttle; linear decay confirmed)
+4327056	0.568433	2.3	discard	MATRIX_LR=0.042: fine-grained test above 0.04, still worse, 0.04 confirmed optimal
+fa3e0d2	0.574380	2.3	discard	resid_lambdas LR x2 (0.005->0.010): more residual adaptation hurts, slow LR confirmed optimal
+fd954c5	0.581888	2.3	discard	VE at even layers (0,2): odd layers (1,3) confirmed better for value embedding placement
+6495d84	0.575446	2.3	discard	ADAM_BETAS beta2=0.92: faster variance adapts worse, 0.95 confirmed optimal
+67d8b3d	0.571786	2.3	discard	Muon warmup start 0.85->0.80: lower initial momentum worse, 0.85 confirmed optimal
+8ad9a56	0.569226	2.3	discard	Muon warmup 300->200 steps: shorter warmup hurts, 300 steps confirmed optimal
+5e75be1	0.575605	2.3	discard	x0 skip at first layer only: all-layers x0 confirmed better, each layer benefits from original input
+4f9bdee	0.584102	2.3	discard	x0 skip at last layer only: all-layers x0 confirmed optimal, each layer needs direct input access
+2377cc4	0.580739	2.3	discard	LayerNorm instead of RMSNorm: slower (~8% MFU) and worse quality, RMSNorm confirmed
+9b06f35	0.581161	2.3	discard	x0 at first+last layers only: all 4 layers need x0 skip, confirmed essential at every layer
+0bfce11	0.576745	2.3	discard	SCALAR_LR=0.40: lower x0 LR worse, 0.5 confirmed optimal (0.4 below and 0.6+ above both worse)
+5e19eca	0.571284	2.3	discard	LOGIT_SOFTCAP=16: slightly above 15 still worse, 15 confirmed optimal (13<15<16<20)
+025f551	0.571502	2.3	discard	WEIGHT_DECAY=0.22: slightly above 0.20 still worse, 0.20 confirmed optimal
+48717f1	0.580306	2.3	discard	Muon beta2=0.96: slightly above 0.95 worse, 0.95 confirmed optimal for Muon variance
+b40cbe6	0.000000	0.0	discard	VE gate bias=True: crashes (1D bias caught by Muon param groups), reverted
+0b5e7d3	0.568682	2.3	discard	WARMDOWN_RATIO=0.48: fine-grained below 0.50 still worse, 0.50 is sharp optimum
+f0e25b4	0.564695	2.3	discard	WARMDOWN_RATIO=0.52: barely worse than 0.50 (delta=0.0008 vs 0.48 delta=0.005); asymmetric
+489f8ab	0.571187	2.3	discard	WARMDOWN_RATIO=0.51: worse than 0.50, confirms 0.52 was luck; 0.50 is confirmed optimal
+e5bc000	0.634546	2.3	discard	2-step auxiliary loss (weight=0.1): much worse, extra compute reduces steps, mixed objective hurts
+461b707	0.572693	2.3	discard	value norm (Q,K,V all normalized): worse than Q,K only; V-norm disrupts VE gate dynamics
+db838c3	0.581498	2.3	discard	x0 after block: pre-block x0 injection confirmed better (post-block anchoring worse)
+ecd9c42	0.570325	2.3	discard	frozen x0_lambdas (LR=0): learned skip adaptation is important, fixed 0.1 is worse
+5004580	0.574585	2.3	discard	beta1=0.7 for embeddings only: global beta1=0.8 confirmed optimal, targeted change also hurts
+1d6a162	0.587954	2.3	discard	Exp 152: Muon for lm_head (replaced AdamW): extremely slow convergence, lm_head needs AdamW not Muon
+7d15765	0.572844	2.3	discard	Exp 153: SwiGLU MLP (gate_proj*up_proj, MLP_RATIO=2 for param parity): worse than SiLU ratio=3
+37e3cad	0.583407	2.3	discard	Exp 154: HEAD_DIM=32 (10 heads vs 5, same model_dim=320): slower, worse than HEAD_DIM=64
+705c449	0.569510	2.3	discard	Exp 155: VE gate channels 32->64 (more features for gating): slightly worse
+f293da7	0.572352	2.3	discard	Exp 156: EMBEDDING_LR=1.15 (between 1.1 and 1.2): worse, 1.2 confirmed optimal
+3e6dd79	0.566240	2.4	discard	Exp 157: DEPTH=6 AR=48 (same model_dim=320, 6 layers): close to best but slower convergence
+d770f24	0.580206	2.4	discard	Exp 158: DEPTH=5 AR=64 (same model_dim=320): worse than DEPTH=4 and DEPTH=6
+83a8ddb	0.569964	2.3	discard	Exp 159: ROPE_BASE=3000 (tuned for chess game length): worse than 10000
+d9fb894	0.570357	2.3	discard	Exp 160: MLP_RATIO=4 (larger MLP, GPT-2 default): more parameters but worse, ratio=3 optimal
+3ed9a7c	0.576939	2.3	discard	Exp 161: UNEMBEDDING_LR=0.006 (above baseline): fast early convergence but worse final, 0.004 optimal
+7a62e8b	0.576186	2.3	discard	Exp 162: x0_lambdas init=0.2 (stronger initial skip): worse, init=0.1 confirmed optimal
+441992c	0.580056	2.3	discard	Exp 163: WINDOW_PATTERN=SSSL (3 short 1024 + 1 long): slower AND worse, L confirmed optimal
+18370dc	0.570893	2.5	discard	Exp 164: AR=96 model_dim=384 (bigger model, 6 heads): higher MFU but fewer steps, worse
+7ffa3e0	0.574704	2.5	discard	Exp 165: AR=96 384d + EMBEDDING_LR=1.32 (muP-compensated LR): still worse, 320d optimal
+b3a50fe	0.575858	2.3	discard	Exp 166: seed=123 (different init): worse than seed=42, initialization matters
+ded5ba4	0.618026	2.3	discard	Exp 167: MQA n_kv_head=1 (GQA is slow on this GPU, 2.6x slower, only ~900 steps)
+2bbb3b6	0.572644	2.3	discard	Exp 168: lm_head bias=True (learnable token priors): slightly worse, bias doesn't help
+cd8459c	0.640148	2.3	discard	Exp 169: Learnable RMSNorm gamma (norm_scale scalar_lr=0.5): training instability, very bad
+3d6da03	0.570623	2.3	discard	Exp 170: TIME_BUDGET=330s (10% more steps): worse, warmdown phase too long, 300s optimal
+009d3ed	0.565453	2.3	discard	Exp 171: WEIGHT_DECAY=0.18 (between 0.15 and 0.20): slightly worse, 0.20 confirmed optimal
+7a9c168	0.709252	2.3	discard	Exp 172: EMA decay=0.999: random init contaminates EMA (15.6% weight), incompatible with warmdown
+b1d45d5	0.566663	2.3	discard	Exp 173: MAX_SEQ_LEN=1024 (shorter context): close but 2048 better for full-game patterns
+1197ff3	1.305424	2.3	discard	Exp 174: label_smoothing=0.1: terrible, chess moves are deterministic, smoothing destroys learning
+b274be4	0.559256	2.3	KEEP	Exp 175: ve_gate_channels=24 NEW BEST (32 was optimal, 24 is better!)
+dda54c5	0.566046	2.3	discard	Exp 176: ve_gate_channels=20 (worse than 24, trend not monotonic)
+d92d110	0.556836	2.3	KEEP	Exp 177: ve_gate_channels=28 NEW BEST (trend: 20<24<32<28)
+1d05bd5	0.567470	2.3	discard	Exp 178: ve_gate_channels=30 (worse than 28, sweet spot confirmed at 28)
+62c53d0	0.559236	2.3	discard	Exp 179: LOGIT_SOFTCAP=14 (worse than 15 with ve_gate=28)
+8470456	0.567145	2.3	discard	Exp 180: ADAM_BETAS beta2=0.94 (worse, 0.95 optimal)
+3db6fdc	0.571980	2.3	discard	Exp 181: MATRIX_LR=0.038 (worse, 0.04 optimal)
+585d351	0.563797	2.3	discard	Exp 182: WEIGHT_DECAY=0.18 (worse with ve_gate=28, 0.2 optimal)
+8d2e415	0.580419	2.3	discard	Exp 183: VE all 4 layers (worse, extra VE overhead hurts)
+876b9d5	0.567765	2.3	discard	Exp 184: EMBEDDING_LR=1.1 (worse with ve_gate=28, 1.2 optimal)
+0c35038	0.566483	2.3	discard	Exp 185: EMBEDDING_LR=1.3 (worse, 1.2 optimal)
+857efd1	CRASH	2.3	discard	Exp 186: VE no gate - unused ve_gate params crash Muon (no gradient)
+3bb0010	0.564601	2.3	discard	Exp 187: Muon beta2=0.97 (worse, 0.95 optimal)
+a34e373	0.570456	2.3	discard	Exp 188: VE no gate (worse, gate is beneficial)
+48221b0	0.566432	2.3	discard	Exp 189: WARMDOWN_RATIO=0.45 (worse, 0.5 optimal)
+3f6fc41	0.569170	2.3	discard	Exp 190: VE gate 320-dim input (worse, fewer channels better)
+4de766a	0.573104	2.3	discard	Exp 191: VE gate 1+sigmoid (worse, 2*sigmoid allows zeroing out VE)
+71bb6d0	0.561625	2.3	discard	Exp 192: VE normalized (close 0.562, but unnormalized 0.557 is better)
+2b82280	0.566043	2.3	discard	Exp 193: softcap=16 (worse, 15 optimal)
+cc27c1c	0.555671	2.3	KEEP	Exp 194: UNEMBEDDING_LR=0.003 NEW BEST (0.004 was best, lower is better)
+d520c7f	0.563818	2.3	discard	Exp 195: UNEMBEDDING_LR=0.002 (worse, 0.003 optimal)
+028cc04	0.576723	2.3	discard	Exp 196: 2-layer VE gate 28->16->5 (much worse, simple linear is better)
+2454ea6	0.570183	2.3	discard	Exp 197: SCALAR_LR=0.4 (worse, 0.5 optimal)
+952f87a	0.567334	2.3	discard	Exp 198: SCALAR_LR=0.6 (worse, 0.5 optimal)
+3615dbb	0.561250	2.3	discard	Exp 199: Muon momentum end=0.96 (worse, 0.95 optimal)
+a3baeab	0.566211	2.3	discard	Exp 200: Muon momentum end=0.94 (worse, 0.95 confirmed optimal)
+b9b4a79	0.565541	2.3	discard	Exp 201: Muon momentum start=0.80 (worse, 0.85->0.95 optimal)
+c781733	0.557478	2.3	discard	Exp 202: V-norm (close 0.557, but 0.556 baseline better)
+d9df810	0.569233	2.3	discard	Exp 203: EMBEDDING_LR=1.25 (worse, 1.2 optimal)
+d321bb0	0.569307	2.3	discard	Exp 204: GELU activation (worse than SiLU)
+b658c8c	0.563260	2.3	discard	Exp 205: WARMUP_RATIO=0.03 (worse, 0.0 optimal)
+62e4812	0.562436	2.3	discard	Exp 206: VE LR=0.5*EMBEDDING_LR (worse, equal LR optimal)
+2d0d4d5	0.565318	2.3	discard	Exp 207: VE LR=2*EMBEDDING_LR (worse, equal LR optimal)
+75438da	0.559696	2.3	discard	Exp 208: HEAD_DIM=80 4 heads (worse, 5 heads at 64 optimal)
+12094c1	0.561616	2.3	discard	Exp 209: MATRIX_LR=0.042 (worse, 0.04 optimal)
+a903469	0.567424	2.3	discard	Exp 210: ROPE_BASE=20000 (worse, 10000 optimal)
+e20aea6	CRASH	2.3	discard	Exp 211: MLP_RATIO=3.5 float causes nn.Linear crash (must be integer)
+4a83936	0.571112	2.3	discard	Exp 212: x0_lambdas init=0.05 (worse, 0.1 optimal)
+1c7f566	0.588676	2.3	discard	Exp 213: TOTAL_BATCH_SIZE=2^15 (much worse, half the steps with 2x batch)
+ea1c752	0.564961	2.3	discard	Exp 214: VE last layer only (worse, both layers 1,3 needed)
+d488411	0.565424	2.3	discard	Exp 215: VE even layers 0,2 (worse, odd layers 1,3 optimal)
+68b303a	0.561052	2.3	discard	Exp 216: WARMDOWN_RATIO=0.55 (worse, 0.5 optimal)
+d8ecc1f	0.561694	2.3	discard	Exp 217: ADAM_BETAS=(0.75,0.95) (worse, 0.8 optimal for beta1)
+4fd1679	0.561694	2.3	discard	Exp 218: ADAM_BETAS=(0.85,0.95) (worse, 0.8 optimal for beta1)
+3fddde5	0.568517	2.3	discard	Exp 219: constant WD (worse, linear decay optimal)
+efb3fc5	0.561565	2.3	discard	Exp 220: VE gate last 28 channels (worse, first 28 optimal)
+fea7d7d	0.563529	2.3	discard	Exp 221: VE gate dims 64:92 (worse, first :28 optimal)
+fb46a3e	0.559322	2.3	discard	Exp 222: UNEMBEDDING_LR=0.0025 (worse, 0.003 confirmed optimal)
+e62b25d	0.564932	2.3	discard	Exp 223: Muon warmup 200 steps (worse, 300 steps optimal)
+3c64a0a	0.571782	2.3	discard	Exp 224: VE gate scale=3 (worse, scale=2 optimal)
+461878c	0.581386	2.3	discard	Exp 225: HEAD_DIM=160 2 heads (much worse, 5 heads at 64 optimal)
+a79168c	0.578996	2.3	discard	Exp 226: HEAD_DIM=40 8 heads (worse, 5 heads at 64 optimal)
+0758a7c	0.557217	2.3	discard	Exp 227: DEPTH=6 AR=48 (model_dim=320, 6 layers vs 4, close but worse)
+5ca8ccdfdeef024fa9a4b1af2662d57e64c671c6	0.569657	2.3	discard	Exp 228: MATRIX_LR=0.044 (worse, 0.04 optimal)
+89aa7aa1eda11fc50c477a3a6d1ba219ff4fa828	0.563031	2.3	discard	Exp 229: ns_steps=6 for Muon (worse, 5 steps optimal)
+c48f8b1c89bc0eef5f1ded2d2bc66a32104a0b12	0.575525	2.3	discard	Exp 230: ROPE_BASE=1000 (worse, 10000 optimal)
+dd5b96640781c840058147e5d584fdd47a1b5ea3	0.572380	2.3	discard	Exp 231: constant WEIGHT_DECAY=0.2 (worse, linear decay to 0 optimal)
+041636051eb21f28110f63812046d0bfcb3f452d	0.570603	2.3	discard	Exp 232: gradient clipping max_norm=1.0 (worse, no clipping optimal)
+415ca6981d4ed10476391dc47cbfb43ce2d2e509	0.578736	2.3	discard	Exp 233: MLP_RATIO=2 (worse, 3 optimal)
+6ca26e49a8386d4b8347266bdb4e2856d2ccd3dd	0.575770	2.3	discard	Exp 234: softcap=20 (worse, 15 optimal)
+bb894bd9ebc04361d922aa11a0528dbccdb59289	0.565060	2.3	discard	Exp 235: x0_params betas=(0.8,0.95) (worse, 0.96/0.95 is optimal)
+3cd2fc000af5cbe9507bcd3c93dec6642acce0d9	0.578313	2.3	discard	Exp 236: WARMUP_RATIO=0.05 (worse, 0.0 optimal)
+bdaafecbc593902bb0c4bc5c63ab7bfa217564e0	0.569915	2.3	discard	Exp 237: ve_gate scale=1.5 (worse, 2.0 optimal)
+6eda48a378993b8eeaa8e260ff9ef08cb38dbf51	0.567287	2.3	discard	Exp 238: SCALAR_LR=0.6 (worse, 0.5 optimal)
+533444d79d159276efcadb4662dd9c86716d8d5d	0.611432	2.3	discard	Exp 239: SwiGLU MLP ratio=2 (much worse, plain SiLU is better)
+a0a01fdb2909637d48e4b8e5f2c1aef9e2b6219c	0.577102	2.3	discard	Exp 240: ve_gate_channels=26 (worse, 28 confirmed optimal)
+7af4b6219807544899f94c187236aff5ea28e014	0.557216	2.3	discard	Exp 242: DEPTH=8 AR=40 TIME_BUDGET=500s (worse than DEPTH=6 best)
+7f3acf88be3efd1ac6bd1d61d669ca40db2db70b	0.562821	2.3	discard	Exp 243: DEPTH=5 AR=64 T=350s (worse than DEPTH=6 best)
+1ebee05c99e1496a853fda8cd1ec0ab9172c9056	0.564823	2.3	discard	Exp 244: DEPTH=4 AR=80 T=400s (worse, DEPTH=4 benefits from 300s not 400s)
+0a988674c2b1a907fd0de309b865f58f1adc576c	0.553692	2.3	discard	Exp 245: DEPTH=6 AR=48 T=500s (worse, 400s optimal)
+12b6b0852c40bbc47600f5ed928c5f53e63ee777	0.555569	2.3	discard	Exp 247: T=440s (worse, 420s optimal for DEPTH=6)
+fcf7bc29eec3ebbafcd81cc533f5a7d05cdcd4ad	0.552145	2.3	discard	Exp 248: DEPTH=6 AR=56 model_dim=384 (worse, 320-dim optimal)
+c779176cf97ad294e8778cd360758bf13db9c4b0	0.557468	2.3	discard	Exp 249: T=410s (worse, noise, 420s confirmed optimal)
+bd7f2f2672b81702c185f3670b21d54c3ae37097	0.560138	2.3	discard	Exp 250: MATRIX_LR=0.036 on DEPTH=6 (worse, 0.04 optimal)
+d6454cef55526e5b6af6f6c3c884a38fa5186073	0.554145	2.3	discard	Exp 251: EMBEDDING_LR=1.0 on DEPTH=6 (worse, 1.2 optimal)
+386dc45a01201355ba3feb5c140b290eb372c846	0.555320	2.3	discard	Exp 252: UNEMBEDDING_LR=0.002 on DEPTH=6 (worse, 0.003 optimal)
+12d9e7cd92a54ac8d67d85cb1464a0a1edfd9fe4	0.564044	2.3	discard	Exp 253: WARMDOWN_RATIO=0.4 on DEPTH=6 (worse, 0.5 optimal)
+0a6b288f2eb55259d73f050ff23bba74e189e2bd	0.553314	2.3	discard	Exp 254: ve_gate_channels=32 on DEPTH=6 (worse, 28 still optimal)
+7e46db750c796860f5804405373d2c04b0fc8702	0.567822	2.3	discard	Exp 255: WINDOW_PATTERN=LS on DEPTH=6 (worse, L optimal)
+bfa82770ece43d9e43f52022258a33988be188a6	0.565852	2.3	discard	Exp 256: DEPTH=7 AR=45 T=470s (worse, DEPTH=6 is optimal depth)
+c626a9546b33fdc8a39f161a17b3a030d4326538	0.554850	2.3	discard	Exp 257: WEIGHT_DECAY=0.25 on DEPTH=6 (worse, 0.2 optimal)
+f6fedd65effcb40f901b13d7fe6f40034972e62d	0.560581	2.3	discard	Exp 258: ADAM_BETAS=(0.85,0.95) on DEPTH=6 (worse, (0.8,0.95) optimal)
+8d9a746f26adf3714e94318075a5bdecd1485f8a	0.570784	2.3	discard	Exp 259: VE at all layers on DEPTH=6 (worse, alternating optimal)
+b12accd91ef2e4dfd58918461f839d5befc7b133	0.571530	2.3	discard	Exp 260: TOTAL_BATCH_SIZE=2^13 on DEPTH=6 (worse, 2^14 optimal)
+7ea5531b3a8f215ecda8ba282fdcd13cacefde87	0.553467	2.3	discard	Exp 261: Muon beta2=0.98 on DEPTH=6 (worse, 0.95 optimal)
+fc7913f3faf8358ade3112f52e6593ac2c9e51e3	0.553607	2.3	discard	Exp 262: VE at even layers 0,2,4 on DEPTH=6 (worse, odd layers optimal)
+8b686f020e6ad5e52bcb4e6d7610fb66191ba166	0.559468	2.3	discard	Exp 263: DEPTH=6 AR=40 model_dim=256 (worse, 320-dim optimal)
+32c28a59a68ee94df5e899f7c772885916e30a62	0.559849	2.3	discard	Exp 264: x0_lambdas init=0.0 on DEPTH=6 (worse, 0.1 optimal)
+5988f1cf01fc4e7f0c90bcecf48c65ef9cf093af	0.569096	2.3	discard	Exp 265: UNEMBEDDING_LR=0.004 on DEPTH=6 (worse, 0.003 confirmed optimal)
+ac8dcf49a52927f2b04f930ec8145b4b27d27741	0.565850	2.3	discard	Exp 266: EMBEDDING_LR=1.5 on DEPTH=6 (worse, 1.2 optimal)
+6f644d7b393bb1cc218d4e0a93fd30898a69b5da	0.561008	2.3	discard	Exp 267: Muon momentum warmup 500 steps (worse, 300 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.555396	2.3	discard	Exp 268: x0_lambdas init=0.2 (worse, 0.1 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.563617	2.3	discard	Exp 269: FINAL_LR_FRAC=0.05 (worse, 0.0 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.581469	2.3	discard	Exp 270: resid_lambdas init=0.9 (much worse, 1.0 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.563740	2.3	discard	Exp 271: Muon final momentum=0.97 (worse, 0.95 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.552038	2.3	discard	Exp 272: ns_steps=6 (slightly worse, 5 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.559505	2.3	discard	Exp 273: SCALAR_LR=0.4 (worse, 0.5 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.574497	2.3	discard	Exp 274: MLP_RATIO=4 (worse, 3 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.561424	2.3	discard	Exp 275: ve_gate_channels=32 (worse, 28 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.556807	2.3	discard	Exp 276: TIME_BUDGET=430s (worse, 420s optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.562612	2.3	discard	Exp 277: WEIGHT_DECAY=0.15 (worse, 0.2 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.566305	2.3	discard	Exp 278: softcap=30 (worse, 15 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.559255	2.3	discard	Exp 279: softcap=10 (worse, 15 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.571308	2.3	discard	Exp 280: ROPE_BASE=5000 (worse, 10000 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.555531	2.3	discard	Exp 281: ROPE_BASE=50000 (worse, 10000 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.553657	2.3	discard	Exp 282: WARMDOWN_RATIO=0.4 (worse but closer, 0.5 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.553734	2.3	discard	Exp 283: WARMDOWN_RATIO=0.6 (worse, 0.5 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.560094	2.3	discard	Exp 284: ADAM_BETAS=(0.85,0.95) (worse, (0.8,0.95) optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.560679	2.3	discard	Exp 285: ve_gate scale=3 (worse, scale=2 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.557398	2.3	discard	Exp 286: ve_gate scale=1.5 (worse, scale=2 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.556193	2.3	discard	Exp 287: Muon init momentum=0.90 (worse, 0.85 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.563288	2.3	discard	Exp 288: MATRIX_LR=0.042 (worse, 0.04 optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.563915	2.3	discard	Exp 289: constant WD no annealing (worse, annealed optimal)
+062501b039363eab8fe93ee4fee8511985673818	0.562684	2.3	discard	Exp 290: cosine LR warmdown (worse, linear optimal)
+c8a281c	0.549389	2.3	keep	Exp 291: TOTAL_BATCH_SIZE=2^15 (NEW BEST 0.549389)
+c8a281c4225ef836874bf52544260df9e45d7670	0.563244	2.3	discard	Exp 292: TOTAL_BATCH_SIZE=2^16 (worse, 2^15 optimal)
+c8a281c4225ef836874bf52544260df9e45d7670	0.562613	2.3	discard	Exp 293: 2^15 + MATRIX_LR=0.057 sqrt2 scaled (worse)
+c8a281c4225ef836874bf52544260df9e45d7670	0.558794	2.3	discard	Exp 294: 2^15 + EMBEDDING_LR=1.7 (worse, 1.2 optimal)
+74518ee	0.548060	2.3	keep	Exp 295: TOTAL_BATCH_SIZE=2^15 T=450s (NEW BEST 0.548060)
+658cc29	0.543643	2.3	keep	Exp 296: TOTAL_BATCH_SIZE=2^15 T=480s (NEW BEST 0.543643)
+658cc293faa8b5af24f9bae441ea1fca4c08d973	0.544357	2.3	discard	Exp 297: 2^15 T=510s (slightly worse than 480s)
+658cc293faa8b5af24f9bae441ea1fca4c08d973	0.549383	2.3	discard	Exp 298: 2^15 T=500s (worse, 480s optimal)
+658cc293faa8b5af24f9bae441ea1fca4c08d973	0.547982	2.3	discard	Exp 299: 2^15 T=490s (worse, 480s optimal)
+e9b13be	0.543465	2.3	keep	Exp 300: 2^15 T=480s ns_steps=6 (NEW BEST 0.543465)
+e9b13bed46f93f839c6f3d7dbd539923013c04cf	0.546640	2.3	discard	Exp 301: ns_steps=7 (worse, 6 optimal)
+db329fb	0.543240	2.3	keep	Exp 302: 2^15 T=480s ns=6 MATRIX_LR=0.035 (NEW BEST 0.543240)
+db329fbfe336f449c89f30433c312f9b1a7361b4	0.546760	2.3	discard	Exp 303: MATRIX_LR=0.030 (worse, 0.035 optimal)
+db329fbfe336f449c89f30433c312f9b1a7361b4	0.548112	2.3	discard	Exp 304: EMBEDDING_LR=1.0 (worse, 1.2 optimal)
+db329fbfe336f449c89f30433c312f9b1a7361b4	0.547228	2.3	discard	Exp 305: SCALAR_LR=0.6 (worse, 0.5 optimal)
+db329fbfe336f449c89f30433c312f9b1a7361b4	0.543362	2.3	discard	Exp 306: UNEMBEDDING_LR=0.002 (slightly worse, 0.003 optimal)
+db329fbfe336f449c89f30433c312f9b1a7361b4	0.543301	2.3	discard	Exp 307: Muon beta2=0.97 (essentially same as 0.95)
+db329fbfe336f449c89f30433c312f9b1a7361b4	0.543591	2.3	discard	Exp 308: WEIGHT_DECAY=0.25 (slightly worse, 0.2 optimal)
+7f2f4a9	0.541114	2.3	keep	Exp 309: ADAM_BETAS=(0.8,0.98) (NEW BEST 0.541114)
+0d4d0f9	0.540507	2.3	keep	Exp 310: ADAM_BETAS=(0.8,0.99) (NEW BEST 0.540507)
+0d4d0f9f8e2eb8613e411deaefa9896753850728	0.541235	2.3	discard	Exp 311: ADAM_BETAS=(0.8,0.999) (worse, 0.99 optimal)
+84e934b	0.539595	2.3	keep	Exp 312: x0_params betas=(0.96,0.99) (NEW BEST 0.539595)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.541891	2.3	discard	Exp 313: x0_params betas=(0.96,0.999) (worse, 0.99 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.541886	2.3	discard	Exp 314: resid_params betas=(0.96,0.99) (worse, adam_betas better)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.541384	2.3	discard	Exp 315: EMBEDDING_LR=1.1 (worse, 1.2 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.547169	2.3	discard	Exp 316: EMBEDDING_LR=1.3 (worse, 1.2 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.555621	2.3	discard	Exp 317: Muon beta2=0.97 (much worse, 0.95 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.560090	2.3	discard	Exp 318: DEPTH=6 AR=64 model_dim=384 (worse, AR=48 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.555974	2.3	discard	Exp 319: MATRIX_LR=0.033 (worse, 0.035 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.554311	2.3	discard	Exp 320: WARMUP_RATIO=0.01 (worse, 0.0 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.553174	2.3	discard	Exp 321: x0_params beta1=0.9 (worse, 0.96 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.557330	2.3	discard	Exp 322: x0_params beta1=0.98 (worse, 0.96 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.555112	2.3	discard	Exp 323: DEPTH=5 480s (worse, DEPTH=6 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.552110	2.3	discard	Exp 324: LM head init std=0.01 (worse, 0.001 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.544979	2.3	discard	Exp 325: DEPTH=7 2^15 T=600s (worse, DEPTH=6 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.549849	2.3	discard	Exp 326: Muon init mom=0.80 (worse, 0.85 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.546987	2.3	discard	Exp 327: softcap=20 (worse, 15 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.561214	2.3	discard	Exp 328: ADAM_BETAS=(0.85,0.99) (worse, (0.8,0.99) optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.552750	2.3	discard	Exp 329: ADAM_BETAS=(0.75,0.99) (worse, 0.8 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.544346	2.3	discard	Exp 330: eps=1e-8 (worse, 1e-10 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.556199	2.3	discard	Exp 331: x0_params lr=0.3 (worse, lr=scalar_lr=0.5 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.558311	2.3	discard	Exp 332: SCALAR_LR=0.6 (worse, 0.5 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.552850	2.3	discard	Exp 333: Muon beta2=0.98 (worse, 0.95 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.557204	2.3	discard	Exp 334: WARMDOWN_RATIO=0.45 (worse, 0.5 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.572691	2.3	discard	Exp 335: WEIGHT_DECAY=0.15 (worse, 0.2 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.579121	2.3	discard	Exp 336: ve_gate_channels=64 (worse, 28 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.556546	2.3	discard	Exp 337: EMBEDDING_LR=1.0 (worse, 1.2 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.566709	2.3	discard	Exp 338: EMBEDDING_LR=1.4 (worse, 1.2 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.570994	2.3	discard	Exp 339: Muon warmup=400 steps (worse, 300 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.562649	2.3	discard	Exp 340: UNEMBEDDING_LR=0.004 (worse, 0.003 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.564741	2.3	discard	Exp 341: DEPTH=7 AR=42 (worse, DEPTH=6 AR=48 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.558043	2.3	discard	Exp 342: DEPTH=5 AR=60 (worse, DEPTH=6 AR=48 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.559873	2.3	discard	Exp 343: no VE ablation (worse, VE at odd layers optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.567112	2.3	discard	Exp 344: VE all layers (worse, odd layers optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.557008	2.3	discard	Exp 345: 2^16 batch 640s (worse, 2^15 480s optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.556970	2.3	discard	Exp 346: FINAL_LR_FRAC=0.05 (worse, 0.0 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.557808	2.3	discard	Exp 347: Muon target mom=0.93 (worse, 0.95 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.575383	2.3	discard	Exp 348: Muon target mom=0.97 (worse, 0.95 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.570325	2.3	discard	Exp 349: MLP_RATIO=4 (worse, 3 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.558709	2.3	discard	Exp 350: MLP_RATIO=2 (worse, 3 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.554659	2.3	discard	Exp 351: MATRIX_LR=0.036 (worse, 0.035 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.559893	2.3	discard	Exp 352: ROPE_BASE=1000 (worse, 10000 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.557419	2.3	discard	Exp 353: softcap=10 (worse, 15 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.562932	2.3	discard	Exp 354: WARMDOWN_RATIO=0.55 (worse, 0.5 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.565864	2.3	discard	Exp 355: WEIGHT_DECAY=0.25 (worse, 0.2 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.560559	2.3	discard	Exp 356: DEPTH=6 AR=54 model_dim=384 (worse, AR=48 dim=320 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.569738	2.3	discard	Exp 357: WARMUP_RATIO=0.05 (worse, 0.0 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.569813	2.3	discard	Exp 358: WINDOW_PATTERN=SL (worse, L optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.589784	2.3	discard	Exp 359: DEPTH=4 AR=80 (worse, DEPTH=6 AR=48 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.562186	2.3	discard	Exp 360: resid_params betas=(0.96,0.99) (worse, (0.8,0.99) optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.557356	2.3	discard	Exp 361: ve_gate_channels=16 (worse, 28 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.563712	2.3	discard	Exp 362: VE gate scale=1 (worse, scale=2 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.558421	2.3	discard	Exp 363: VE gate scale=3 (worse, scale=2 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.552422	2.3	discard	Exp 364: AR=54 dim=384 600s (worse, AR=48 dim=320 480s optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.549097	2.3	discard	Exp 365: DEPTH=8 AR=36 640s (worse, DEPTH=6 AR=48 480s optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.554399	2.3	discard	Exp 366: constant WD (worse, decaying WD optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.547402	2.3	discard	Exp 367: ADAM_BETAS=(0.78,0.99) (worse, (0.8,0.99) optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.567327	2.3	discard	Exp 368: ROPE_BASE=100 (worse, 10000 optimal so far)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.557049	2.3	discard	Exp 369: ROPE_BASE=100000 (worse, 10000 optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.565906	2.3	discard	Exp 370: HEAD_DIM=32 10heads (worse, HEAD_DIM=64 5heads optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.556886	2.3	discard	Exp 371: SwiGLU MLP (worse, SiLU optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.560545	2.3	discard	Exp 372: parallel block (worse, sequential optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.559733	2.3	discard	Exp 373: no QK-Norm (worse, QK-Norm optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.555285	2.3	discard	Exp 374: QK-Norm before RoPE (worse, after-RoPE optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.577983	2.3	discard	Exp 375: SDPA scale=1.0 (much worse, default scale optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.554248	2.3	discard	Exp 376: GELU activation (worse, SiLU optimal)
+84e934be51eb9245b31224fdd783b1c4e77ea629	0.539555	2.3	keep	Exp 425: wte init std=0.5 NEW BEST (was 1.0, smaller init helps)

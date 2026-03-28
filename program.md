@@ -1,6 +1,6 @@
-# autoresearch
+# autoresearch — Chess PGN Edition
 
-This is an experiment to have the LLM do its own research.
+This is an experiment to have the LLM do its own research, training a tiny language model on Chess PGN game notation.
 
 ## Setup
 
@@ -12,15 +12,32 @@ To set up a new experiment, work with the user to:
    - `README.md` — repository context.
    - `prepare.py` — fixed constants, data prep, tokenizer, dataloader, evaluation. Do not modify.
    - `train.py` — the file you modify. Model architecture, optimizer, training loop.
-4. **Verify data exists**: Check that `~/.cache/autoresearch/` contains data shards and a tokenizer. If not, tell the human to run `uv run prepare.py`.
+4. **Verify data exists**: Check that `h:/autoresearch/.cache/datasets/chesspgn/` contains `.pgn.zst` files and a tokenizer. If not, tell the human to run:
+   ```
+   set AUTORESEARCH_CACHE_DIR=h:/autoresearch/.cache && uv run prepare.py --dataset chesspgn
+   ```
 5. **Initialize results.tsv**: Create `results.tsv` with just the header row. The baseline will be recorded after the first run.
 6. **Confirm and go**: Confirm setup looks good.
 
 Once you get confirmation, kick off the experimentation.
 
+## Environment
+
+Always set the cache dir before running anything:
+
+```
+export AUTORESEARCH_CACHE_DIR="h:/autoresearch/.cache"
+```
+
+Training command (always redirect output — never let it flood context):
+
+```
+AUTORESEARCH_CACHE_DIR=h:/autoresearch/.cache uv run train.py --dataset chesspgn > run.log 2>&1
+```
+
 ## Experimentation
 
-Each experiment runs on a single GPU. The training script runs for a **fixed time budget of 5 minutes** (wall clock training time, excluding startup/compilation). You launch it simply as: `uv run train.py`.
+Each experiment runs on a single GPU. The training script runs for a **fixed time budget of 5 minutes** (wall clock training time, excluding startup/compilation).
 
 **What you CAN do:**
 - Modify `train.py` — this is the only file you edit. Everything is fair game: model architecture, optimizer, hyperparameters, training loop, batch size, model size, etc.
@@ -30,13 +47,26 @@ Each experiment runs on a single GPU. The training script runs for a **fixed tim
 - Install new packages or add dependencies. You can only use what's already in `pyproject.toml`.
 - Modify the evaluation harness. The `evaluate_bpb` function in `prepare.py` is the ground truth metric.
 
-**The goal is simple: get the lowest val_bpb.** Since the time budget is fixed, you don't need to worry about training time — it's always 5 minutes. Everything is fair game: change the architecture, the optimizer, the hyperparameters, the batch size, the model size. The only constraint is that the code runs without crashing and finishes within the time budget.
+**The goal is simple: get the lowest val_bpb on Chess PGN data.** Since the time budget is fixed, you don't need to worry about training time — it's always 5 minutes. Everything is fair game: change the architecture, the optimizer, the hyperparameters, the batch size, the model size. The only constraint is that the code runs without crashing and finishes within the time budget.
 
-**VRAM** is a soft constraint. Some increase is acceptable for meaningful val_bpb gains, but it should not blow up dramatically.
+**VRAM is a HARD constraint**: This machine has an RTX 3070 Laptop with only **8 GB VRAM**. If peak_vram_mb exceeds ~7500 (~7.3 GB), you are dangerously close to OOM. Keep memory budget in mind for every experiment. `torch.compile` is disabled (Windows compatibility mode). Activation checkpointing is on by default.
 
-**Simplicity criterion**: All else being equal, simpler is better. A small improvement that adds ugly complexity is not worth it. Conversely, removing something and getting equal or better results is a great outcome — that's a simplification win. When evaluating whether to keep a change, weigh the complexity cost against the improvement magnitude. A 0.001 val_bpb improvement that adds 20 lines of hacky code? Probably not worth it. A 0.001 val_bpb improvement from deleting code? Definitely keep. An improvement of ~0 but much simpler code? Keep.
+**Simplicity criterion**: All else being equal, simpler is better. A small improvement that adds ugly complexity is not worth it. Conversely, removing something and getting equal or better results is a great outcome — that's a simplification win.
 
 **The first run**: Your very first run should always be to establish the baseline, so you will run the training script as is.
+
+## Chess-specific research ideas
+
+Chess PGN is a much more regular/structured domain than English text. This opens up different hyperparameter regimes:
+
+- **Smaller model, more steps**: Chess tokens are less ambiguous. A shallower model (DEPTH=4 or 6) with many gradient steps often beats a deep model with few steps.
+- **Batch size**: Smaller TOTAL_BATCH_SIZE → more optimizer steps → faster convergence on short training budgets.
+- **WINDOW_PATTERN**: Try "L" (full attention) vs "SSSL" (sliding window). Chess positions have long-range dependencies (openings affect endgames).
+- **ASPECT_RATIO**: Chess moves are short sequences. A narrower model (lower ASPECT_RATIO) may generalize better.
+- **Learning rate**: Chess notation is structured; try slightly higher LR than the default.
+- **WARMDOWN_RATIO**: The fraction of steps in cosine decay. Try values from 0.3 to 0.6.
+- **HEAD_DIM**: Standard values are 64 or 128. Chess might benefit from 64 (more heads for same width).
+- **Sanity check**: Occasionally look at generated text to see if moves look like valid PGN.
 
 ## Output format
 
@@ -55,10 +85,10 @@ num_params_M:     50.3
 depth:            8
 ```
 
-Note that the script is configured to always stop after 5 minutes, so depending on the computing platform of this computer the numbers might look different. You can extract the key metric from the log file:
+Extract key metrics from the log file:
 
 ```
-grep "^val_bpb:" run.log
+grep "^val_bpb:\|^peak_vram_mb:" run.log
 ```
 
 ## Logging results
@@ -89,21 +119,21 @@ d4e5f6g	0.000000	0.0	crash	double model width (OOM)
 
 ## The experiment loop
 
-The experiment runs on a dedicated branch (e.g. `autoresearch/mar5` or `autoresearch/mar5-gpu0`).
+The experiment runs on a dedicated branch (e.g. `autoresearch/mar21`).
 
 LOOP FOREVER:
 
 1. Look at the git state: the current branch/commit we're on
 2. Tune `train.py` with an experimental idea by directly hacking the code.
 3. git commit
-4. Run the experiment: `uv run train.py > run.log 2>&1` (redirect everything — do NOT use tee or let output flood your context)
+4. Run the experiment: `AUTORESEARCH_CACHE_DIR=h:/autoresearch/.cache uv run train.py --dataset chesspgn > run.log 2>&1` (redirect everything — do NOT use tee or let output flood your context)
 5. Read out the results: `grep "^val_bpb:\|^peak_vram_mb:" run.log`
 6. If the grep output is empty, the run crashed. Run `tail -n 50 run.log` to read the Python stack trace and attempt a fix. If you can't get things to work after more than a few attempts, give up.
 7. Record the results in the tsv
 8. If val_bpb improved (lower), you "advance" the branch, keeping the git commit
 9. If val_bpb is equal or worse, you git reset back to where you started
 
-The idea is that you are a completely autonomous researcher trying things out. If they work, keep. If they don't, discard. And you're advancing the branch so that you can iterate. If you feel like you're getting stuck in some way, you can rewind but you should probably do this very very sparingly (if ever).
+The idea is that you are a completely autonomous researcher trying things out. If they work, keep. If they don't, discard. And you're advancing the branch so that you can iterate.
 
 **Timeout**: Each experiment should take ~5 minutes total (+ a few seconds for startup and eval overhead). If a run exceeds 10 minutes, kill it and treat it as a failure (discard and revert).
 

@@ -363,12 +363,14 @@ class CausalSelfAttention(nn.Module):
         self.c_k = nn.Linear(self.n_embd, self.n_kv_head * self.head_dim, bias=False)
         self.c_v = nn.Linear(self.n_embd, self.n_kv_head * self.head_dim, bias=False)
         self.c_proj = nn.Linear(self.n_embd, self.n_embd, bias=False)
-        self.ve_gate_channels = 32
+        self.ve_gate_channels = 28
         self.ve_gate = nn.Linear(self.ve_gate_channels, self.n_kv_head, bias=False) if has_ve(layer_idx, config.n_layer) else None
         self._mask_cache = {}
 
     def _get_sdpa_mask(self, seq_len, window_size, device):
         window = window_size[0] if isinstance(window_size, tuple) else window_size
+        if window is None or window >= seq_len:
+            return None  # use is_causal=True instead for full causal attention
         cache_key = (seq_len, int(window), device.type, device.index)
         mask = self._mask_cache.get(cache_key)
         if mask is not None:
@@ -376,9 +378,7 @@ class CausalSelfAttention(nn.Module):
 
         row = torch.arange(seq_len, device=device).unsqueeze(1)
         col = torch.arange(seq_len, device=device).unsqueeze(0)
-        mask = col <= row  # causal
-        if window is not None and window >= 0 and window < seq_len:
-            mask = mask & (col >= (row - window))
+        mask = (col <= row) & (col >= (row - window))
         self._mask_cache[cache_key] = mask
         return mask
 
@@ -406,7 +406,7 @@ class CausalSelfAttention(nn.Module):
             k,
             v,
             attn_mask=attn_mask,
-            is_causal=False,
+            is_causal=(attn_mask is None),
             enable_gqa=self.n_kv_head < self.n_head,
         )
         y = y.transpose(1, 2)
@@ -419,12 +419,12 @@ class CausalSelfAttention(nn.Module):
 class MLP(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.c_fc = nn.Linear(config.n_embd, 4 * config.n_embd, bias=False)
-        self.c_proj = nn.Linear(4 * config.n_embd, config.n_embd, bias=False)
+        self.c_fc = nn.Linear(config.n_embd, MLP_RATIO * config.n_embd, bias=False)
+        self.c_proj = nn.Linear(MLP_RATIO * config.n_embd, config.n_embd, bias=False)
 
     def forward(self, x):
         x = self.c_fc(x)
-        x = F.relu(x).square()
+        x = F.silu(x)
         x = self.c_proj(x)
         return x
 
@@ -466,7 +466,7 @@ class GPT(nn.Module):
 
     @torch.no_grad()
     def init_weights(self, embed_dtype=torch.bfloat16):
-        torch.nn.init.normal_(self.transformer.wte.weight, mean=0.0, std=1.0)
+        torch.nn.init.normal_(self.transformer.wte.weight, mean=0.0, std=0.5)
         torch.nn.init.normal_(self.lm_head.weight, mean=0.0, std=0.001)
         n_embd = self.config.n_embd
         s = 3 ** 0.5 * n_embd ** -0.5
@@ -580,7 +580,7 @@ class GPT(nn.Module):
             dict(kind="adamw", params=embedding_params, lr=embedding_lr * dmodel_lr_scale, betas=adam_betas, eps=1e-10, weight_decay=0.0),
             dict(kind="adamw", params=value_embeds_params, lr=embedding_lr * dmodel_lr_scale, betas=adam_betas, eps=1e-10, weight_decay=0.0),
             dict(kind="adamw", params=resid_params, lr=scalar_lr * 0.01, betas=adam_betas, eps=1e-10, weight_decay=0.0),
-            dict(kind="adamw", params=x0_params, lr=scalar_lr, betas=(0.96, 0.95), eps=1e-10, weight_decay=0.0),
+            dict(kind="adamw", params=x0_params, lr=scalar_lr, betas=(0.96, 0.99), eps=1e-10, weight_decay=0.0),
         ]
         muon_group_chunk = 8
         for shape in sorted({p.shape for p in matrix_params}):
@@ -593,7 +593,7 @@ class GPT(nn.Module):
                         params=chunk,
                         lr=matrix_lr,
                         momentum=0.95,
-                        ns_steps=5,
+                        ns_steps=6,
                         beta2=0.95,
                         weight_decay=weight_decay,
                     )
@@ -796,25 +796,26 @@ class MuonAdamW(torch.optim.Optimizer):
 # ---------------------------------------------------------------------------
 
 # Model architecture
-ASPECT_RATIO = 64         # model_dim = depth * ASPECT_RATIO
-HEAD_DIM = 128            # target head dimension for attention
-WINDOW_PATTERN = "SSSL"   # sliding window pattern: L=full, S=half context
+ASPECT_RATIO = 48         # model_dim = depth * ASPECT_RATIO
+HEAD_DIM = 64             # target head dimension for attention
+MLP_RATIO = 3             # MLP hidden expansion factor (default 4)
+WINDOW_PATTERN = "L"      # sliding window pattern: L=full, S=half context
 
 # Optimization
-TOTAL_BATCH_SIZE = 2 ** 19
-EMBEDDING_LR = 0.6
-UNEMBEDDING_LR = 0.004
-MATRIX_LR = 0.04
+TOTAL_BATCH_SIZE = 2 ** 15
+EMBEDDING_LR = 1.2
+UNEMBEDDING_LR = 0.003
+MATRIX_LR = 0.035
 SCALAR_LR = 0.5
 WEIGHT_DECAY = 0.2
-ADAM_BETAS = (0.8, 0.95)
+ADAM_BETAS = (0.8, 0.99)
 WARMUP_RATIO = 0.0
 WARMDOWN_RATIO = 0.5
 FINAL_LR_FRAC = 0.0
 
 # Model size + memory defaults
-DEPTH = 8
-DEVICE_BATCH_SIZE = 16
+DEPTH = 6
+DEVICE_BATCH_SIZE = 8
 EVAL_BATCH_SIZE = 8
 
 

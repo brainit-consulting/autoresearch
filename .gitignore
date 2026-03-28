@@ -18,3 +18,10 @@ AGENTS.md
 
 # Experimental code/artifacts
 dev/
+
+# Local dataset cache
+.cache/
+
+# Local training artifacts
+checkpoint_pre_eval.pt
+run.log
