@@ -4,6 +4,21 @@
 
 This repo trains a tiny LLM on chess PGN game data from Lichess. An AI agent autonomously experiments with architecture and hyperparameters in `train.py`, keeping changes that lower val_bpb (bits per byte) and reverting those that don't.
 
+Public-facing branch summary:
+
+- Baseline logged result: `1.345913`
+- Best logged result: `0.539555`
+- Improvement vs baseline: about `59.9%`
+- Current evaluation: `val_bpb` plus qualitative PGN sampling
+- Not yet included: legality checks, FEN-aware evaluation, or engine-strength benchmarks
+
+See also:
+
+- `../chess-pgn-progress.md`
+- `../progress.png`
+- `../progress-waterfall.png`
+- `../progress-categories.png`
+
 ## Prerequisites
 
 - NVIDIA GPU (tested on RTX 3070 Laptop, 8GB VRAM)
@@ -48,6 +63,23 @@ Single 5-minute training run:
 ```bash
 AUTORESEARCH_CACHE_DIR=h:/autoresearch/.cache uv run train.py --dataset chesspgn
 ```
+
+## Interpreting Results Correctly
+
+The current branch should be described as a chess-PGN modeling project, not a verified chess-playing model.
+
+What the current results support:
+
+- the model learns PGN formatting and metadata structure
+- the autonomous loop finds repeatable metric improvements
+- the checkpoint can generate plausible-looking chess headers and opening lines
+
+What the current results do not support yet:
+
+- reliable legal move generation
+- continuation accuracy from a known board state
+- engine-measured move quality
+- claims of playing strength
 
 ## Running the Autonomous Research Agent
 
