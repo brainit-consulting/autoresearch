@@ -4,6 +4,8 @@
 
 This repository is a fork of [karpathy/autoresearch](https://github.com/karpathy/autoresearch), adapted for native Windows/NVIDIA use and currently focused on a chess-PGN research run built on Lichess game records.
 
+Try a live game here: [chess-pi-wheat.vercel.app](https://chess-pi-wheat.vercel.app/).
+
 ![progress](progress.png)
 
 ## What This Repo Is Now
