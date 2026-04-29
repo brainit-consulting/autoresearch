@@ -139,3 +139,7 @@ The listed support matrix in the codebase is still relevant for the Windows/NVID
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Support
+
+If this project helps you, you can support DreamForge Academy here: [Buy Me a Coffee](https://buymeacoffee.com/dreamforgeacademy).
